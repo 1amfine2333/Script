@@ -111,20 +111,36 @@ hostname = ms.jr.jd.com, me-api.jd.com, api.m.jd.com
 此文件为Node.js专用。其他用户请忽略
  */
 //此处填写京东账号cookie。
-let CookieJDs = [
-  '',//账号一ck,例:pt_key=XXX;pt_pin=XXX;
-  '',//账号二ck,例:pt_key=XXX;pt_pin=XXX;如有更多,依次类推
-]
-// 判断环境变量里面是否有京东ck
-if (process.env.JD_COOKIE) {
-  if (process.env.JD_COOKIE.indexOf('&') > -1) {
-    CookieJDs = process.env.JD_COOKIE.split('&');
-  } else if (process.env.JD_COOKIE.indexOf('\n') > -1) {
-    CookieJDs = process.env.JD_COOKIE.split('\n');
-  } else {
-    CookieJDs = [process.env.JD_COOKIE];
-  }
-}
+const $ = new API("jddj_plantBeans");
+let ckPath = './jdCookie.js';//ck路径,环境变量:JDDJ_CKPATH
+
+let cookies = [];
+let thiscookie = '', deviceid = '';
+let lat = '30.' + Math.round(Math.random() * (99999 - 10000) + 10000);
+let lng = '114.' + Math.round(Math.random() * (99999 - 10000) + 10000);
+let cityid = Math.round(Math.random() * (1500 - 1000) + 1000);
+!(async () => {
+    if (cookies.length == 0) {
+        if ($.env.isNode) {
+            if (process.env.JDDJ_CKPATH) ckPath = process.env.JDDJ_CKPATH;
+            let jdcookies = require(ckPath);
+            for (let key in jdcookies) if (!!jdcookies[key]) cookies.push(jdcookies[key]);
+        }
+        else {
+            let ckstr = $.read('#jddj_cookies');
+            if (!!ckstr) {
+                if (ckstr.indexOf(',') < 0) {
+                    cookies.push(ckstr);
+                } else {
+                    cookies = ckstr.split(',');
+                }
+            }
+        }
+    }
+    if (cookies.length == 0) {
+        console.log(`\r\n请先填写cookie`);
+        return;
+    }
 
 var LogDetails = false; //是否开启响应日志, true则开启
 
